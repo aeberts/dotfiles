@@ -68,16 +68,25 @@ DISABLE_AUTO_UPDATE="true"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(macos
-         git
+plugins=(
          alias-finder
          colored-man-pages
+         colorize
+         dircycle
          emacs
+         git
+         git-extras
+         history
+         history-substring-search
          lein
+         macos
+         node
+         npm
+         per-directory-history
+         themes
          vscode
          zsh-syntax-highlighting
-         per-directory-history
-         vi-mode
+         zsh-vi-mode
         )
 
 source $ZSH/oh-my-zsh.sh
@@ -96,9 +105,15 @@ source $ZSH/oh-my-zsh.sh
  if [[ -n $SSH_CONNECTION ]]; then
    export EDITOR='vim'
  else
-   export EDITOR='vim'
-   export VISUAL='vim'
+   export EDITOR='ec'
+   export VISUAL='ec'
  fi
+
+# ZVM provides vim bindings for zsh
+# https://github.com/jeffreytse/zsh-vi-mode#custom-escape-key
+ZVM_VI_INSERT_ESCAPE_BINDKEY=df
+ZVM_VI_VISUAL_ESCAPE_BINDKEY=df
+ZVM_VI_OPPEND_ESCAPE_BINDKEY=df
 
 # from https://gist.github.com/jdhao/086c772370fedd5160286429e4226df2
 # cursor configurations for zsh-vim-mode
@@ -198,7 +213,6 @@ if type rg &> /dev/null; then
 	export FZF_ALT_C_COMMAND='rg --files --hidden'
 fi
 
-
 export FZF_DEFAULT_OPTS="--height 80% --reverse
 			--multi --info=inline 
 			--preview='$HOME/.vim/pack/zand/start/fzf.vim/bin/preview.sh {}' 
@@ -220,4 +234,3 @@ export PATH="/usr/local/sbin:$PATH"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
