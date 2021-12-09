@@ -1,0 +1,248 @@
+" VIMSCRIPT -------------------------------------------------------------- {{{
+
+" This will enable code folding.
+" Use the marker method of folding.
+augroup filetype_vim
+    autocmd!
+    autocmd FileType vim setlocal foldmethod=marker
+augroup END
+
+" If the current file type is HTML, set indentation to 2 spaces.
+autocmd Filetype html setlocal tabstop=2 shiftwidth=2 expandtab
+
+" Auto load vim-plug if it's not already downloaded
+let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+if empty(glob(data_dir . '/autoload/plug.vim'))
+  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+" }}}
+
+" PLUGINS ---------------------------------------------------------------- {{{
+" Plugins need to be called first in the .vimrc file incase they are called
+" later. See: https://github.com/junegunn/vim-plug/wiki/faq#im-getting-cannot-find-color-scheme--does-vim-plug-support-color-schemes
+
+call plug#begin('~/.vim/plugged')
+" Using vim-plug https://github.com/junegunn/vim-plug
+" Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
+" Plug 'junegunn/vim-easy-align'
+
+Plug 'wincent/terminus'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } 
+Plug 'junegunn/fzf.vim'
+Plug 'junegunn/vim-peekaboo'
+Plug 'guns/vim-clojure-static'
+Plug 'tpope/vim-repeat'
+Plug 'guns/vim-sexp'
+Plug 'tpope/vim-sexp-mappings-for-regular-people'
+Plug 'tpope/vim-surround'
+Plug 'terryma/vim-expand-region'
+Plug 'mhinz/vim-startify' 
+
+" Colorschemes rtp = 'run time path' 
+ Plug 'sonph/onehalf', { 'rtp': 'vim' } 
+ Plug 'arcticicestudio/nord-vim'
+ Plug 'habamax/vim-sugarlily'
+
+" Initialize plugin system
+call plug#end()
+
+" }}}
+
+" GENERAL_CONFIGS -------------------------------------------------- {{{ 
+"
+" Omerxx vim notebook: https://github.com/omerxx/vim-notebook  
+"
+" Disable compatibility with vi which can cause unexpected issues.
+set nocompatible
+
+" Enable type file detection. Vim will be able to try to detect the type of file in use.
+filetype on 
+
+" Disable all cursor blinking:
+" https://vim.fandom.com/wiki/Configuring_the_cursor#Disabling_cursor_blinking
+set guicursor+=a:blinkon0
+
+" Turn syntax highlighting on.
+syntax on
+
+" Yank to the system clipboard
+set clipboard=unnamed
+
+" Add numbers to each line on the left-hand side.
+set number
+
+" Highlight cursor line underneath the cursor horizontally.
+set cursorline
+
+" While searching though a file incrementally highlight matching characters as you type.
+set incsearch
+
+" Ignore capital letters during search.
+set ignorecase
+
+" Override the ignorecase option if searching for capital letters.
+" This will allow you to search specifically for capital letters.
+set smartcase
+
+" Show partial command you type in the last line of the screen.
+set showcmd
+
+" Show the mode you are on the last line.
+set showmode
+
+" Show matching words during a search.
+set showmatch
+
+" Use highlighting when doing a search.
+set hlsearch
+
+" Set the commands to save in history default number is 20.
+set history=1000
+
+" Enable auto completion menu after pressing TAB.
+set wildmenu
+
+" There are certain files that we would never want to edit with Vim.
+" Wildmenu will ignore files with these extensions.
+set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
+
+" Auto load vim-plug if it's not already downloaded
+let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+if empty(glob(data_dir . '/autoload/plug.vim'))
+  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+" Resets the cursor to a bar after leaving vim
+" https://stackoverflow.com/questions/15549375/reset-or-set-cursor-shape-on-vimleave
+autocmd VimLeave * let &t_me="\<Esc>]50;CursorShape=1\x7"
+
+" }}}
+
+" FONTS COLORS THEMES --------------------------------------------------------------- {{{
+
+" If GUI version of Vim is running set these options.
+if has('gui_macvim') || has('macunix') || has('mac')
+
+    " Set the background tone.
+    set background=dark
+
+    " Set the color scheme.
+    " Default installed schemes /usr/local/Cellar/vim/8.2.3400/share/vim/vim82/colors
+    " Reference: https://linuxhint.com/vim_color_schemes/
+    " https://github.com/sonph/onehalf/tree/master/vim
+    " colorscheme sugarlily
+    colorscheme onehalfdark
+    " colorscheme onehalflight
+    " colorscheme nord
+
+    " Set a custom font you have installed on your computer.
+    " Syntax: set guifont=<font_name>\ <font_weight>\ <size>
+    set guifont=JetBrains\ Mono\:h14
+
+    " extend the selection with shift + arrow keys 
+    let macvim_hig_shift_movement = 1
+
+endif
+
+" }}}
+
+" MAPPINGS --------------------------------------------------------------- {{{
+" To check all default mappings use :h index
+" To check all mappings use :map and :map!
+" https://stackoverflow.com/questions/2483849/detect-if-a-key-is-bound-to-something-in-vim
+"
+" map leader key to <space> 
+" Must unmap space first to make sure it works properly
+nnoremap <SPACE> <Nop>
+let mapleader=" "
+
+" Map fd and df to <ESC> 
+inoremap fd <esc>
+inoremap df <esc>
+
+" Yank from cursor to the end of line.
+nnoremap Y y$
+
+" Map to redo
+nnoremap U <C-r>
+
+" Files
+"
+" Save file with <leader>fs
+nnoremap <silent> <Leader>fs :w<CR>
+
+" Using fzf 
+" The following are from https://learnvim.irian.to/basics/searching-files
+" Vim FzF Commands https://github.com/junegunn/fzf.vim 
+nnoremap <silent> <Leader>bb :Buffers<CR>
+nnoremap <silent> <Leader>ff :Files<CR>
+nnoremap <silent> <Leader>fr :History<CR>
+nnoremap <silent> <Leader>: :Commands<CR>
+nnoremap <silent> <Leader>ww :Windows<CR>
+nnoremap <silent> <Leader>hh :Helptags<CR>
+
+" Windows
+" delete current window
+nnoremap <silent> <Leader>bd :bd<CR>
+
+" Clear screen also clears search highlighting
+" From https://stackoverflow.com/questions/4982710/which-custom-key-bindings-do-you-use-in-vim
+nnoremap <C-L> :nohl<CR><C-L>
+
+" Center the cursor vertically when moving to the next line in a search
+nnoremap n nzz
+nnoremap N Nzz
+
+" Go to start of current paragraph
+" https://stackoverflow.com/questions/67744054/vim-how-to-jump-to-start-end-of-paragraph-which-works-in-all-cases
+nnoremap g{ vipo<Esc>
+nnoremap g} vipoo<Esc>
+
+" Move lines up or down (keybinding doesnt' work)
+" From https://vim.fandom.com/wiki/Moving_lines_up_or_down 
+nnoremap <A-j> :m .+1<CR>==
+nnoremap <A-k> :m .-2<CR>==
+inoremap <A-j> <Esc>:m .+1<CR>==gi
+inoremap <A-k> <Esc>:m .-2<CR>==gi
+vnoremap <A-j> :m '>+1<CR>gv=gv
+vnoremap <A-k> :m '<-2<CR>gv=gv
+
+" }}}
+
+" STATUS LINE ------------------------------------------------------------ {{{
+
+" Clear status line when vimrc is reloaded.
+set statusline=
+
+" Status line left side.
+set statusline+=\ %F\ %M\ %Y\ %R
+
+" Use a divider to separate the left side from the right side.
+set statusline+=%=
+
+" Status line right side.
+set statusline+=\ ascii:\ %b\ hex:\ 0x%B\ row:\ %l\ col:\ %c\ percent:\ %p%%
+
+" Show the status on the second to last line.
+set laststatus=2
+
+" }}}
+
+" FZF --------------------------------------------------------------- {{{
+" Fuzzy File Finder 
+" Vim FzF Commands https://github.com/junegunn/fzf.vim 
+
+let $FZF_DEFAULT_COMMAND = 'rg --files --hidden'
+let $FZF_DEFAULT_OPTS = '--reverse'
+let g:fzf_layout = { 'window': { 'width': 1, 'height': 0.4, 'yoffset': 1, 'border': 'none' } }  
+
+" Preview window on the upper side of the window with 40% height,
+" hidden by default, ctrl-/ to toggle
+let g:fzf_preview_window = ['right:hidden', 'ctrl-p']
+
+" }}}
+
+
