@@ -1,5 +1,5 @@
 # If you come from bash you might have to change your $PATH.
-export PATH=$HOME/bin:/usr/local/bin:/usr/local/sbin:/usr/local/opt/make/libexec/gnubin:$PATH
+export PATH=$HOME/bin:/usr/local/bin:/usr/local/sbin:/usr/local/opt/make/libexec/gnubin:"$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
 
 # Path to your oh-my-zsh installation.
 export ZSH="/Users/zand/.oh-my-zsh"
@@ -24,7 +24,7 @@ ZSH_THEME="robbyrussell"
 # HYPHEN_INSENSITIVE="true"
 
 # Uncomment the following line to disable bi-weekly auto-update checks.
-DISABLE_AUTO_UPDATE="true"
+DISABLE_AUTO_UPDATE="false"
 
 # Uncomment the following line to automatically update without prompting.
 # DISABLE_UPDATE_PROMPT="true"
@@ -182,7 +182,7 @@ export LS_COLORS
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias ls="/usr/local/bin/gls --color=auto"
+alias ls="gls --color=auto"
 alias sleepless="pmset -g assertions | egrep '(PreventUserIdleSystemSleep|PreventUserIdleDisplaySleep)'"
 # git check origin
 alias gvo="git fetch origin && git log HEAD..origin/master --oneline"
@@ -191,12 +191,14 @@ alias gvod="git fetch origin && git log HEAD..origin/develop --oneline"
 alias gvu="git fetch upstream && git log HEAD..upstream/master --oneline"
 alias gvud="git fetch upstream && git log HEAD..upstream/develop --oneline"
 alias vim='/usr/local/bin/vim'
-alias cm='/usr/local/bin/chezmoi'
+alias cm='chezmoi'
 alias opsi='eval $(op signin my)'
 
 # Jenv Configuration
-export PATH="$HOME/.jenv/bin:$HOME/bin:$PATH"
-eval "$(jenv init -)"
+if type -p jenv &> /dev/null; then
+	export PATH="$HOME/.jenv/bin:$HOME/bin:$PATH"
+	eval "$(jenv init -)"
+fi
 
 # Homebrew personal access token:
 export HOMEBREW_GITHUB_API_TOKEN={{ (onepasswordDetailsFields "Homebrew Github API Token").password.value }}
@@ -228,8 +230,10 @@ export FZF_ALT_C_COMMAND="fd . $HOME"
 bindkey "ç" fzf-cd-widget
 
 # Pyenv configuration
-eval "$(pyenv init -)"
-export PATH="/usr/local/sbin:$PATH"
+if type -p pyenv &> /dev/null; then
+	eval "$(pyenv init -)"
+	export PATH="/usr/local/sbin:$PATH"
+fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
