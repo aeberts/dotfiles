@@ -1,0 +1,73 @@
+{{- if (eq .chezmoi.os "darwin") -}}
+#!/bin/bash
+
+set -eufo pipefail
+
+{{ $taps := list
+"homebrew/cask-versions"
+"railwaycat/emacsmacport"
+-}}
+
+{{ $brews := list
+"coreutils"
+"aspell"
+"babashka"
+"bat"
+"clojure/tools/clojure"
+"clj-kondo"
+"clojure-lsp-native"
+"emacs-mac --with-modules"
+"font-hack-nerd-font"
+"font-source-code-pro"
+"fd"
+"fzf"
+"goku"
+"leiningen"
+"markdown"
+"mas"
+"node"
+"readline"
+"ripgrep"
+"rlwrap"
+"vim"
+"wget"
+-}}
+
+{{ $casks := list
+"alfred"
+"brave-browser"
+"discord"
+"google-chrome"
+"hammerspoon"
+"intellij-idea-ce"
+"karabiner-elements"
+"macvim"
+"microsoft-word"
+"microsoft-excel"
+"microsoft-powerpoint"
+"qlcolorcode"
+"qlimagesize"
+"qlmarkdown"
+"qlstephen"
+"qlvideo"
+"scrivener"
+"slack"
+"spotify"
+"superduper"
+"temurin11"
+"visual-studio-code"
+"vlc"
+-}}
+
+brew bundle --no-lock --file=/dev/stdin <<EOF
+{{ range ( $taps | uniq) -}}
+tap "{{ . }}"
+{{ end -}}
+{{ range ($brews | uniq) -}}
+brew "{{ . }}"
+{{ end -}}
+{{ range ($casks | uniq) -}}
+cask "{{ . }}"
+{{ end -}}
+EOF
+{{ end -}}
