@@ -1,0 +1,13 @@
+[credential]
+	helper = osxkeychain
+[user]
+	name = Alex Eberts
+	email = alex.eberts@gmail.com
+[init]
+	defaultBranch = main
+[push]
+	followTags = true
+[pull]
+	rebase = false
+[http]
+	sslVerify = false
