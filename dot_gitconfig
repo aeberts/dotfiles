@@ -8,6 +8,6 @@
 [push]
 	followTags = true
 [pull]
-	rebase = false
+	rebase = true
 [http]
 	sslVerify = false
