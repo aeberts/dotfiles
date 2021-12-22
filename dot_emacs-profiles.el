@@ -10,8 +10,8 @@
 ("default" . ((user-emacs-directory . "~/.doom-emacs")
 	      (env . (("DOOMDIR" . "~/.doom.d")))))
 
-("doom" . ((user-emacs-directory . "~/.doom-emacs")
-	      (env . (("DOOMDIR" . "~/.doom.d")))))
+("doom-zand" . ((user-emacs-directory . "~/.doom-emacs")
+	      (env . (("DOOMDIR" . "~/.doom.d.zand")))))
 
 ("spacemacs" . ((user-emacs-directory . "~/.spacemacs-emacs")
 	      (env . (("SPACEMACSDIR" . "~/.spacemacs.d")))))
