@@ -1,0 +1,4 @@
+.doom.d/.git/**
+.doom.d/custom.el
+.doom.d.zand/.git/**
+.doom.d.zand/custom.el
