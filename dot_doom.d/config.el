@@ -3,7 +3,6 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
-
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Alexander Eberts"
@@ -19,9 +18,10 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
-;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 (setq doom-font (font-spec :family "JetBrains Mono" :size 13))
+;; (setq doom-font (font-spec :family "Menlo" :size 12))
+;; (setq doom-font (font-spec :family "SF Mono" :size 12))
+;; (setq doom-variable-pitch-font (font-spec :family "sans"))
 
 ;; Change local leader key to , instead of SPC m
 ;; we lose the evil-snipe-backwards-f but I don't use it anyway
@@ -30,16 +30,18 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
+;; (setq doom-theme 'doom-one)
 
+;; Configure themes
 (use-package doom-themes
   ;; https://github.com/hlissner/emacs-doom-themes/tree/screenshots
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  ;; (load-theme 'leuven t) ; my main light theme
+  (load-theme 'leuven t) ; my main light theme
   ;; (load-theme 'leuven-dark t) ; dark version of leuven (not my favourite)
-  (setq doom-theme 'doom-one) ; my main dark theme
+  ;; (setq doom-theme 'doom-one) ; my main dark theme
   ;; (setq doom-theme 'doom-spacegrey)
   ;; (setq doom-theme 'doom-wilmersdorf)
   ;; (setq doom-theme 'doom-palenight)
@@ -61,19 +63,131 @@
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
-
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
+;; Configure Highlight Mode in visual line mode:
+;; from: https://stackoverflow.com/questions/31541907/highlight-a-single-line-in-a-larger-word-wrapped-line;
+(defun visual-line-range ()
+  (save-excursion
+    (cons
+     (progn (beginning-of-visual-line) (point))
+     (progn (end-of-visual-line) (point)))))
+
+(setq hl-line-range-function 'visual-line-range)
+
+;; Helm Configuration
+;;
+;; Use max length of buffer names before truncating
+;; https://emacs.stackexchange.com/questions/485/how-to-widen-helm-buffer-names-in-helm-buffers-list
+(setq helm-buffer-max-length nil)
+
+;; Company Mode
+;; https://github.com/hlissner/doom-emacs/blob/develop/modules/completion/company/README.org
+;;
+;; Trigger company files with C-x C-f
+(setq company-backends '(company-files company-capf))
+
+;; Disable company-mode by default in org-mode files
+;;(setq company-global-modes '(not org-mode))
+
+;; Turn off auto completion
+;; https://github.com/company-mode/company-mode/issues/773
+(setq company-idle-delay nil)
+
+(map! :after company
+      :map company-mode-map
+      :desc "C-x j" :i "C-x j" #'company-ispell)
+
+;; Not a company-mode binding but hippie-expand can be useful.
+;; Default binding is M-/
+
+;; Flyspell and Spell-fu
+;;
+;; Set the default language for the personal dictionary:
+(setq ispell-dictionary "en")
+
+;; Toggle Spell-Fu-Mode when loading org-mode files
+(after! org-mode
+  (spell-fu-mode 'toggle))
+
+;; Don't spellcheck links in markdown documents
+(defun +markdown-flyspell-word-p ()
+  "Return t if point is on a word that should be spell checked.
+
+Return nil if on a link url, markup, html, or references."
+  (let ((faces (doom-enlist (get-text-property (point) 'face))))
+    (or (and (memq 'font-lock-comment-face faces)
+             (memq 'markdown-code-face faces))
+        (not (cl-loop with unsafe-faces = '(markdown-reference-face
+                                            markdown-url-face
+                                            markdown-markup-face
+                                            markdown-comment-face
+                                            markdown-html-attr-name-face
+                                            markdown-html-attr-value-face
+                                            markdown-html-tag-name-face
+                                            markdown-code-face)
+                      for face in faces
+                      if (memq face unsafe-faces)
+                      return t)))))
+
+(set-flyspell-predicate! '(markdown-mode gfm-mode)
+  #'+markdown-flyspell-word-p)
+
+;; Org-Mode configuration
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+(setq org-directory "~/Dropbox/org/")
+(setq org-startup-folded 1)
+;; (setq org-ellipsis " ▼ ")
+(require 'org-tempo) ;; org-tempo allows us to type <s TAB and complete org-mode templates.
+
+;; ;; Customize org-mode structure templates
+;; https://orgmode.org/manual/Structure-Templates.html#Structure-Templates
+;; https://emacs.stackexchange.com/questions/63875/emacs-org-mode-shortcut-to-create-code-block
+(add-to-list 'org-structure-template-alist
+             '("z" . "src clojure"))
+
+;reset the org-structure-template-alist in case of errors
+;; (custom-reevaluate-setting 'org-structure-template-alist)
+
+;; Org-Roam Settings:
+;;
+(setq org-roam-directory "~/Dropbox/org/org-roam")
+(setq org-roam-index-file "index.org")
+(setq org-roam-capture-templates
+      '(
+        ("d" "default" plain #'org-roam-capture--get-point
+         "%?"
+         :file-name "${slug}"
+         :head "#+title: ${title}\n#+roam_tags:\n\nSummary ::\nSource ::\n\n"
+         :unnarrowed t)))
+
+;; See /Users/zand/.doom-emacs/.local/straight/repos/org-mode/lisp/org.el:1163
+(setq org-show-context-detail
+      '((agenda . local)
+        (bookmark-jump . lineage)
+        (isearch . lineage)
+        (default . lineage)))
+
+;; Autocompletion for org-roam
+;; add company-dabbrev to the set-company-backend to complete regular words in org files.
+;; (require 'company-org-roam)
+;; (use-package company-org-roam
+;;   :when (featurep! :completion company)
+;;   :after org-roam
+;;   :config
+;;   (set-company-backend! 'org-mode '(company-org-roam company-yasnippet)))
+
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq display-line-numbers-type nil)
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
-;; - `use-package!' for configuring packages
+;; - `use-package' for configuring packages
 ;; - `after!' for running code after a package has loaded
 ;; - `add-load-path!' for adding directories to the `load-path', relative to
 ;;   this file. Emacs searches the `load-path' when you load packages with
@@ -81,14 +195,15 @@
 ;; - `map!' for binding new keys
 ;;
 ;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
+;; the highlighted symbol at press 'K' (non-evil users must press 'C-c g k').
 ;; This will open documentation for it, including demos of how they are used.
 ;;
-;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
+;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
+;;
 
 ;; Base Functions and Navigation
-
+;;
 ;; Switch to the new window after splitting
 (setq evil-split-window-below t
       evil-vsplit-window-right t);
@@ -98,8 +213,129 @@
   (setq evil-escape-key-sequence "fd")
   (setq evil-escape-unordered-key-sequence t))
 
-;; Custom Keybindings
+;; Treemacs Configuration
+(use-package treemacs
+  :bind
+  (:map global-map
+    ("M-0"       . treemacs-select-window)
+    ("C-x t 1"   . treemacs-delete-other-windows)
+    ("C-x t t"   . treemacs)
+    ("C-x t B"   . treemacs-bookmark)
+    ("C-x t C-t" . treemacs-find-file)
+    ("C-x t M-t" . treemacs-find-tag)))
 
+;; Lispy Configuration
+(setq lispyville-key-theme
+        '((operators normal)
+          c-w
+          (prettify insert)
+          (atom-movement t)
+          slurp/barf-lispy
+          additional
+          additional-insert
+          additional-motions
+          commentary))
+
+;; Clojure / Cider mode configurations.
+;;
+;; Display an overlay of the currently selected history item in buffer
+(setq cider-repl-history-show-preview t)
+;; Syntax highlight overlays in cider buffers
+(setq cider-overlays-use-font-lock t)
+;; Set the default cljs repl type
+(setq cider-default-cljs-repl 'shadow)
+
+;; The following is supposed to fix cider mode from the Doom Emacs discord channel
+;; (after! cider
+;;   (add-hook 'company-completion-started-hook 'custom/set-company-maps)
+;;   (add-hook 'company-completion-finished-hook 'custom/unset-company-maps)
+;;   (add-hook 'company-completion-cancelled-hook 'custom/unset-company-maps))
+
+;; (defun custom/unset-company-maps (&rest unused)
+;;   "Set default mappings (outside of company).
+;;     Arguments (UNUSED) are ignored."
+;;   (general-def
+;;     :states 'insert
+;;     :keymaps 'override
+;;     "<down>" nil
+;;     "<up>"   nil
+;;     "RET"    nil
+;;     [return] nil
+;;     "C-n"    nil
+;;     "C-p"    nil
+;;     "C-j"    nil
+;;     "C-k"    nil
+;;     "C-h"    nil
+;;     "C-u"    nil
+;;     "C-d"    nil
+;;     "C-s"    nil
+;;     "C-S-s"   (cond ((featurep! :completion helm) nil)
+;;                     ((featurep! :completion ivy)  nil))
+;;     "C-SPC"   nil
+;;     "TAB"     nil
+;;     [tab]     nil
+;;     [backtab] nil))
+
+;; (defun custom/set-company-maps (&rest unused)
+;;   "Set maps for when you're inside company completion.
+;;     Arguments (UNUSED) are ignored."
+;;   (general-def
+;;     :states 'insert
+;;     :keymaps 'override
+;;     "<down>" #'company-select-next
+;;     "<up>" #'company-select-previous
+;;     "RET" #'company-complete
+;;     [return] #'company-complete
+;;     "C-w"     nil  ; don't interfere with `evil-delete-backward-word'
+;;     "C-n"     #'company-select-next
+;;     "C-p"     #'company-select-previous
+;;     "C-j"     #'company-select-next
+;;     "C-k"     #'company-select-previous
+;;     "C-h"     #'company-show-doc-buffer
+;;     "C-u"     #'company-previous-page
+;;     "C-d"     #'company-next-page
+;;     "C-s"     #'company-filter-candidates
+;;     "C-S-s"   (cond ((featurep! :completion helm) #'helm-company)
+;;                     ((featurep! :completion ivy)  #'counsel-company))
+;;     "C-SPC"   #'company-complete-common
+;;     "TAB"     #'company-complete-common-or-cycle
+;;     [tab]     #'company-complete-common-or-cycle
+;;     [backtab] #'company-select-previous))
+
+;; {{{ ==== Begin Custom Keybindings
+;;
+;; General Information on customizing key bindings:
+;; https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-do-i-bind-my-own-keys-or-change-existing-ones
+;; https://github.com/hlissner/doom-emacs/blob/develop/modules/config/default/+evil-bindings.el
+
+;; unbind C-m from RET - doesn't work because C-m is the default?
+;;(map! :map "C-m" nil)
+;;
+;; Custom Movement Keys in Insert Mode (doesn't work for org-mode argh)
+
+;; (map! :i "C-j" #'evil-next-line) ;; replaces +default/newline
+;; (map! :i "C-k" #'evil-previous-line) ;; replaces n: C-k kill-line i: C-k evil-insert-digraph
+;; (map! :i "C-h" #'evil-backward-char) ;; replaces C-h for help which is also bound to F1
+;; (map! :i "C-l" #'evil-forward-char) ;; replaces i: recenter-top-bottom n: recenter-top-bottom
+;; (map! :i "C-;" #'doom/forward-to-last-non-comment-or-eol) ;; i: C-; nil by default
+
+;; (map! :i "C-M-h" #'evil-backward-word-begin) ;; replaces mark-defun use expand-region instead?
+;; (map! :i "C-M-l" #'evil-forward-word-begin) ;; replaces reposition-window
+;;
+;; Unbind text-scale-decrease because I hit it by accident
+(map! :n "C--" nil)
+
+;; Reference https://github.com/hlissner/doom-emacs/issues/2403
+(map! :map general-override-mode-map
+      :i "C-j" #'evil-next-line         ;; replaces +default/newline
+      :i "C-k" #'evil-previous-line     ;; replaces n: C-k kill-line i: C-k evil-insert-digraph
+      :i "C-h" #'evil-backward-char     ;; replaces C-h for help which is also bound to F1
+      :i "C-l" #'evil-forward-char      ;; replaces i: recenter-top-bottom n: recenter-top-bottom
+      :i "C-M-h" #'evil-backward-word-begin ;; replaces mark-defun consider using expand-region instead?
+      :in "C-;" #'doom/forward-to-last-non-comment-or-eol ;; i: C-; nil by default
+      :in "C-'" #'doom/forward-to-last-non-comment-or-eol ;; n: C-' nil by default
+      )
+;;
 ;; Expand Region
 (map!
  :nv "C-+" #'er/contract-region
@@ -108,6 +344,21 @@
 
 ;; Map C-- to expand region because I always miss it.
 (map! :nv "C--" #'er/expand-region)
+
+;; Add another way to get to hippie-expand or dabbrev-expand because it's so useful
+(map! :map general-override-mode-map
+      :i "C-\\" #'dabbrev-expand) ;; replaces toggle-input-method
+
+;; ==== End Custom Keybinding }}}
+;;
+;; {{{ ==== Begin Custom Toggles
+;;
+;; Toggle company-mode completions globally
+(map! :leader
+      (:prefix ("t" . "toggle")
+       (:desc "Autocomplete" "a" #'+company/toggle-auto-completion)))
+
+;; ==== End Custom Toggles }}}
 
 ;; My Custom Functions
 
@@ -165,7 +416,7 @@ Version 2016-07-13"
   (kill-new
    (format "%s:%d" (buffer-file-name) (save-restriction
                                         (widen) (line-number-at-pos)))))
-;;
+
 ;; From https://stackoverflow.com/questions/2926088/how-to-indent-a-buffer-in-ess
 ;; Re-indent whole buffer
 (defun z-indent-buffer()
