@@ -109,8 +109,14 @@
 (setq ispell-dictionary "en")
 
 ;; Toggle Spell-Fu-Mode when loading org-mode files
-(after! org-mode
-  (spell-fu-mode 'toggle))
+;; This doesn't seem to work..
+
+(defun toggle-spell-fu-in-org ()
+  "Toggle spell-fu when loading an org-mode file"
+  (when spell-fu-mode (spell-fu-mode-disable)))
+
+(add-hook 'org-mode-hook #'toggle-spell-fu-in-org)
+
 
 ;; Don't spellcheck links in markdown documents
 (defun +markdown-flyspell-word-p ()
@@ -179,6 +185,13 @@ Return nil if on a link url, markup, html, or references."
 ;;   :after org-roam
 ;;   :config
 ;;   (set-company-backend! 'org-mode '(company-org-roam company-yasnippet)))
+
+;; Toggle the org roam window when loading an org mode file.
+(defun toggle-org-roam-in-org-roam ()
+  "Toggle org-roam window when loading an org-roam file"
+  (when org-roam-mode (org-roam)))
+
+(add-hook 'org-roam-buffer-prepare-hook #'toggle-org-roam-in-org-roam)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
