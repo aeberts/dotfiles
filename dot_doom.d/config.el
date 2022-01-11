@@ -217,6 +217,8 @@ Return nil if on a link url, markup, html, or references."
 
 ;; Base Functions and Navigation
 ;;
+;; Evil Configuration
+;;
 ;; Switch to the new window after splitting
 (setq evil-split-window-below t
       evil-vsplit-window-right t);
@@ -226,7 +228,24 @@ Return nil if on a link url, markup, html, or references."
   (setq evil-escape-key-sequence "fd")
   (setq evil-escape-unordered-key-sequence t))
 
+;; From: https://ko.arihant-impex.in/emacs_threads/questions/39447/remap-vim-keys-in-evil-mode
+(defun delete-selection-and-paste ()
+  "Emulate copy replaces selection"
+  (interactive)
+  (delete-region (region-beginning) (region-end)) (yank))
+
+;; Evil keybindings
+;; Ref: (map! :leader :desc "Description" :n "C-c" #'dosomething)
+;; Ref: (map! :map emacs-lisp-mode-map "C-c p" #'do-something)
+
+;; (define-key evil-visual-state-map (kbd "p") 'delete-selection-and-paste)
+(map! :map evil-visual-state-map
+      :desc "Emulate `copy replaces selection` in visual mode"
+      :v
+      "p" #'delete-selection-and-paste)
+
 ;; Treemacs Configuration
+;;
 (use-package treemacs
   :bind
   (:map global-map
@@ -238,6 +257,7 @@ Return nil if on a link url, markup, html, or references."
     ("C-x t M-t" . treemacs-find-tag)))
 
 ;; Lispy Configuration
+;;
 (setq lispyville-key-theme
         '((operators normal)
           c-w
@@ -258,63 +278,6 @@ Return nil if on a link url, markup, html, or references."
 ;; Set the default cljs repl type
 (setq cider-default-cljs-repl 'shadow)
 
-;; The following is supposed to fix cider mode from the Doom Emacs discord channel
-;; (after! cider
-;;   (add-hook 'company-completion-started-hook 'custom/set-company-maps)
-;;   (add-hook 'company-completion-finished-hook 'custom/unset-company-maps)
-;;   (add-hook 'company-completion-cancelled-hook 'custom/unset-company-maps))
-
-;; (defun custom/unset-company-maps (&rest unused)
-;;   "Set default mappings (outside of company).
-;;     Arguments (UNUSED) are ignored."
-;;   (general-def
-;;     :states 'insert
-;;     :keymaps 'override
-;;     "<down>" nil
-;;     "<up>"   nil
-;;     "RET"    nil
-;;     [return] nil
-;;     "C-n"    nil
-;;     "C-p"    nil
-;;     "C-j"    nil
-;;     "C-k"    nil
-;;     "C-h"    nil
-;;     "C-u"    nil
-;;     "C-d"    nil
-;;     "C-s"    nil
-;;     "C-S-s"   (cond ((featurep! :completion helm) nil)
-;;                     ((featurep! :completion ivy)  nil))
-;;     "C-SPC"   nil
-;;     "TAB"     nil
-;;     [tab]     nil
-;;     [backtab] nil))
-
-;; (defun custom/set-company-maps (&rest unused)
-;;   "Set maps for when you're inside company completion.
-;;     Arguments (UNUSED) are ignored."
-;;   (general-def
-;;     :states 'insert
-;;     :keymaps 'override
-;;     "<down>" #'company-select-next
-;;     "<up>" #'company-select-previous
-;;     "RET" #'company-complete
-;;     [return] #'company-complete
-;;     "C-w"     nil  ; don't interfere with `evil-delete-backward-word'
-;;     "C-n"     #'company-select-next
-;;     "C-p"     #'company-select-previous
-;;     "C-j"     #'company-select-next
-;;     "C-k"     #'company-select-previous
-;;     "C-h"     #'company-show-doc-buffer
-;;     "C-u"     #'company-previous-page
-;;     "C-d"     #'company-next-page
-;;     "C-s"     #'company-filter-candidates
-;;     "C-S-s"   (cond ((featurep! :completion helm) #'helm-company)
-;;                     ((featurep! :completion ivy)  #'counsel-company))
-;;     "C-SPC"   #'company-complete-common
-;;     "TAB"     #'company-complete-common-or-cycle
-;;     [tab]     #'company-complete-common-or-cycle
-;;     [backtab] #'company-select-previous))
-
 ;; {{{ ==== Begin Custom Keybindings
 ;;
 ;; General Information on customizing key bindings:
@@ -325,12 +288,6 @@ Return nil if on a link url, markup, html, or references."
 ;;(map! :map "C-m" nil)
 ;;
 ;; Custom Movement Keys in Insert Mode (doesn't work for org-mode argh)
-
-;; (map! :i "C-j" #'evil-next-line) ;; replaces +default/newline
-;; (map! :i "C-k" #'evil-previous-line) ;; replaces n: C-k kill-line i: C-k evil-insert-digraph
-;; (map! :i "C-h" #'evil-backward-char) ;; replaces C-h for help which is also bound to F1
-;; (map! :i "C-l" #'evil-forward-char) ;; replaces i: recenter-top-bottom n: recenter-top-bottom
-;; (map! :i "C-;" #'doom/forward-to-last-non-comment-or-eol) ;; i: C-; nil by default
 
 ;; (map! :i "C-M-h" #'evil-backward-word-begin) ;; replaces mark-defun use expand-region instead?
 ;; (map! :i "C-M-l" #'evil-forward-word-begin) ;; replaces reposition-window
