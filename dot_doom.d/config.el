@@ -234,6 +234,25 @@ Return nil if on a link url, markup, html, or references."
   (interactive)
   (delete-region (region-beginning) (region-end)) (yank))
 
+;; Make evil-delete bypass yank so that only explicitly yanked text is put in registers
+;; https://github.com/syl20bnr/spacemacs/issues/6977
+;; https://stackoverflow.com/questions/37787393/change-dd-command-in-evil-mode-to-not-write-to-clipboard
+(defun bb/evil-delete (orig-fn beg end &optional type _ &rest args)
+  (apply orig-fn beg end type ?_ args))
+(advice-add 'evil-delete :around 'bb/evil-delete)
+
+;; Allow pasting the current word with most recently copied text in normal mode
+;; Should be bound to a keybinding at some point
+;; From: https://emacs.stackexchange.com/questions/66647/create-a-function-that-deletes-word-on-point-and-replace-with-the-yank-register
+(defun replace-evil-word-at-point ()
+  "Selects the word at point, removes it, and yanks the most recent killed text."
+  (interactive)
+  (let ((bounds (evil-inner-word)))
+    (if bounds
+      (progn (delete-and-extract-region (pop bounds) (pop bounds))
+             (yank))
+      (message "No word at point"))))
+
 ;; Evil keybindings
 ;; Ref: (map! :leader :desc "Description" :n "C-c" #'dosomething)
 ;; Ref: (map! :map emacs-lisp-mode-map "C-c p" #'do-something)
