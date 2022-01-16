@@ -1,0 +1,471 @@
+* Instructions
+
+The source blocks in this file are automatically converted to a config.el file after running ~/.doom-emacs/bin/doom sync
+
+Details: ~/.doom-emacs/modules/config/literate/README.org
+
+* Basic Config
+
+Here are some additional functions/macros that could help you configure Doom:
+
+- `load!' for loading external *.el files relative to this one
+- `use-package' for configuring packages
+- `after!' for running code after a package has loaded
+- `add-load-path!' for adding directories to the `load-path', relative to
+  this file. Emacs searches the `load-path' when you load packages with
+  `require' or `use-package'.
+- `map!' for binding new keys
+
+To get information about any of these functions/macros, move the cursor over
+the highlighted symbol at press 'K' (non-evil users must press 'C-c g k').
+This will open documentation for it, including demos of how they are used.
+
+You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
+they are implemented.
+
+#+begin_src elisp
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+
+;; Place your private configuration here! Remember, you do not need to run 'doom
+;; sync' after modifying this file!
+
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets.
+(setq user-full-name "Alexander Eberts"
+      user-mail-address "alex.eberts@gmail.com")
+#+end_src
+
+#+begin_src elisp
+;; Change local leader key to , instead of SPC m
+;; we lose the evil-snipe-backwards-f but I don't use it anyway
+(setq doom-localleader-key ",")
+#+end_src
+
+#+begin_src elisp
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq display-line-numbers-type t)
+#+end_src
+
+#+begin_src elisp
+;; Set the initial frame size
+(setq initial-frame-alist '((top . 1) (left . 1) (width . 157) (height . 81)))
+#+end_src
+
+* Fonts
+
+#+begin_src elisp
+;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
+;; are the three important ones:
+;;
+;; + `doom-font'
+;; + `doom-variable-pitch-font'
+;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming
+;;
+;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
+;; font string. You generally only need these two:
+(setq doom-font (font-spec :family "JetBrains Mono" :size 13))
+;; (setq doom-font (font-spec :family "Menlo" :size 12))
+;; (setq doom-font (font-spec :family "SF Mono" :size 12))
+;; (setq doom-variable-pitch-font (font-spec :family "sans"))
+
+#+end_src
+
+* Themes
+
+#+begin_src elisp
+;; Configure themes
+(use-package doom-themes
+  ;; https://github.com/hlissner/emacs-doom-themes/tree/screenshots
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'leuven t) ; my main light theme
+  ;; (load-theme 'leuven-dark t) ; dark version of leuven (not my favourite)
+  ;; (setq doom-theme 'doom-one) ; my main dark theme
+  ;; (setq doom-theme 'doom-spacegrey)
+  ;; (setq doom-theme 'doom-wilmersdorf)
+  ;; (setq doom-theme 'doom-palenight)
+  ;; (setq doom-theme 'doom-tomorrow-day)
+  ;; (setq doom-theme 'doom-one-light)
+  ;; (setq doom-theme 'spacemacs-light)
+  ;; (setq doom-theme 'cyberpunk-theme)
+  ;; (load-theme 'adwaita t)            ; buit in light theme
+  ;;
+  ;; Enable flashing mode-line on errors
+  ;; (doom-themes-visual-bell-config)
+
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+  (doom-themes-treemacs-config)
+
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+#+end_src
+
+* Evil Config
+
+#+begin_src elisp
+;; Switch to the new window after splitting
+(setq evil-split-window-below t
+      evil-vsplit-window-right t);
+
+;; evil-escape allows you to type chorded key sequences to quit
+(after! evil-escape
+  (setq evil-escape-key-sequence "fd")
+  (setq evil-escape-unordered-key-sequence t))
+
+;; From: https://ko.arihant-impex.in/emacs_threads/questions/39447/remap-vim-keys-in-evil-mode
+(defun delete-selection-and-paste ()
+  "Emulate copy replaces selection"
+  (interactive)
+  (delete-region (region-beginning) (region-end)) (yank))
+
+;; Make evil-delete bypass yank so that only explicitly yanked text is put in registers
+;; https://github.com/syl20bnr/spacemacs/issues/6977
+;; https://stackoverflow.com/questions/37787393/change-dd-command-in-evil-mode-to-not-write-to-clipboard
+(defun bb/evil-delete (orig-fn beg end &optional type _ &rest args)
+  (apply orig-fn beg end type ?_ args))
+
+(advice-add 'evil-delete :around 'bb/evil-delete)
+
+;; Allow pasting the current word with most recently copied text in normal mode
+;; Should be bound to a keybinding at some point
+;; From: https://emacs.stackexchange.com/questions/66647/create-a-function-that-deletes-word-on-point-and-replace-with-the-yank-register
+(defun replace-evil-word-at-point ()
+  "Selects the word at point, removes it, and yanks the most recent killed text."
+  (interactive)
+  (let ((bounds (evil-inner-word)))
+    (if bounds
+      (progn (delete-and-extract-region (pop bounds) (pop bounds))
+             (yank))
+      (message "No word at point"))))
+#+end_src
+
+* Evil Keybindings
+
+#+begin_src elisp
+;; (define-key evil-visual-state-map (kbd "p") 'delete-selection-and-paste)
+(map! :map evil-visual-state-map
+      :desc "Emulate `copy replaces selection` in visual mode"
+      :v
+      "p" #'delete-selection-and-paste)
+#+end_src
+
+* Helm Config
+
+#+begin_src elisp
+;; Use max length of buffer names before truncating
+;; https://emacs.stackexchange.com/questions/485/how-to-widen-helm-buffer-names-in-helm-buffers-list
+(setq helm-buffer-max-length nil)
+#+end_src
+
+* Company Config
+
+#+begin_src elisp
+;; Trigger company files with C-x C-f
+(setq company-backends '(company-files company-capf))
+#+end_src
+
+#+begin_src elisp
+;; Disable company-mode by default in org-mode files
+;;(setq company-global-modes '(not org-mode))
+#+end_src
+
+#+begin_src elisp
+;; Turn off auto completion
+;; https://github.com/company-mode/company-mode/issues/773
+(setq company-idle-delay nil)
+
+(map! :after company
+      :map company-mode-map
+      :desc "C-x j" :i "C-x j" #'company-ispell)
+#+end_src
+
+#+begin_src elisp
+;; Not a company-mode binding but dabbrev-expand aka `hippie-expand` can be useful.
+;; Default binding for dabbrev-expand is M-/ but I have it bound to C-\ as well
+#+end_src
+
+* Spell-Fu
+
+#+begin_src elisp
+;; Set the default language for the personal dictionary:
+(setq ispell-dictionary "en")
+#+end_src
+
+#+begin_src elisp
+;; Toggle Spell-Fu-Mode when loading org-mode files
+(defun toggle-spell-fu-in-org ()
+  "Toggle spell-fu when loading an org-mode file"
+  (when spell-fu-mode (spell-fu-mode-disable)))
+
+(add-hook 'org-mode-hook #'toggle-spell-fu-in-org)
+#+end_src
+
+#+begin_src elisp
+;; Don't spellcheck links in markdown documents
+(defun +markdown-flyspell-word-p ()
+  "Return t if point is on a word that should be spell checked.
+
+Return nil if on a link url, markup, html, or references."
+  (let ((faces (doom-enlist (get-text-property (point) 'face))))
+    (or (and (memq 'font-lock-comment-face faces)
+             (memq 'markdown-code-face faces))
+        (not (cl-loop with unsafe-faces = '(markdown-reference-face
+                                            markdown-url-face
+                                            markdown-markup-face
+                                            markdown-comment-face
+                                            markdown-html-attr-name-face
+                                            markdown-html-attr-value-face
+                                            markdown-html-tag-name-face
+                                            markdown-code-face)
+                      for face in faces
+                      if (memq face unsafe-faces)
+                      return t)))))
+
+(set-flyspell-predicate! '(markdown-mode gfm-mode)
+  #'+markdown-flyspell-word-p)
+#+end_src
+
+* Org Config
+Org module Readme:
+~/.doom-emacs/modules/lang/org/README.org
+
+Default Doom Emacs config:
+~/.doom-emacs/modules/lang/org/config.el
+~/.doom-emacs/modules/lang/org/autoload/org.el
+~/.doom-emacs/.local/straight/repos/org/lisp/org.el
+
+#+begin_src elisp
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+(setq org-directory "~/Dropbox/org/")
+(setq org-startup-folded 1)
+;; (setq org-ellipsis " ▼ ")
+
+;; org-tempo allows us to type <s TAB and complete org-mode templates.
+;; https://emacs.stackexchange.com/questions/46795/is-it-possible-to-add-templates-other-than-begin-end-to-org-structure-temp
+(require 'org-tempo)
+
+;; Customize org-mode structure templates
+;; https://orgmode.org/manual/Structure-Templates.html#Structure-Templates
+;; https://emacs.stackexchange.com/questions/63875/emacs-org-mode-shortcut-to-create-code-block
+(with-eval-after-load 'org
+  (add-to-list 'org-structure-template-alist
+               '("z" . "src clojure"))
+  (add-to-list 'org-structure-template-alist
+               '("u" . "src elisp")))
+
+;; reset the org-structure-template-alist in case of errors
+;; (custom-reevaluate-setting 'org-structure-template-alist)
+#+end_src
+
+* Org-Roam Config:
+
+#+begin_src elisp
+(setq org-roam-directory "~/Dropbox/org/org-roam")
+(setq org-roam-index-file "index.org")
+(setq org-roam-capture-templates
+      '(
+        ("d" "default" plain #'org-roam-capture--get-point
+         "%?"
+         :file-name "${slug}"
+         :head "#+title: ${title}\n#+roam_tags:\n\nSummary ::\nSource ::\n\n"
+         :unnarrowed t)))
+
+;; See /Users/zand/.doom-emacs/.local/straight/repos/org-mode/lisp/org.el:1163
+(setq org-show-context-detail
+      '((agenda . local)
+        (bookmark-jump . lineage)
+        (isearch . lineage)
+        (default . lineage)))
+#+end_src
+
+
+#+begin_src elisp
+;; Autocompletion for org-roam
+;; add company-dabbrev to the set-company-backend to complete regular words in org files.
+(require 'company-org-roam)
+(use-package company-org-roam
+  :when (featurep! :completion company)
+  :after org-roam
+  :config
+  (set-company-backend! 'org-mode '(company-org-roam company-yasnippet)))
+
+;; Toggle the org roam window when loading an org mode file.
+(defun toggle-org-roam-in-org-roam ()
+  "Toggle org-roam window when loading an org-roam file"
+  (when org-roam-mode (org-roam-buffer-toggle-display)))
+
+(add-hook 'org-roam-buffer-prepare-hook #'toggle-org-roam-in-org-roam)
+#+end_src
+
+* Treemacs Config
+
+#+begin_src elisp
+
+(use-package treemacs
+  :bind
+  (:map global-map
+    ("M-0"       . treemacs-select-window)
+    ("C-x t 1"   . treemacs-delete-other-windows)
+    ("C-x t t"   . treemacs)
+    ("C-x t B"   . treemacs-bookmark)
+    ("C-x t C-t" . treemacs-find-file)
+    ("C-x t M-t" . treemacs-find-tag)))
+
+#+end_src
+
+* Lispy Config
+
+#+begin_src elisp
+
+(setq lispyville-key-theme
+        '((operators normal)
+          c-w
+          (prettify insert)
+          (atom-movement t)
+          slurp/barf-lispy
+          additional
+          additional-insert
+          additional-motions
+          commentary))
+
+#+end_src
+
+* Clojure Cider Config
+
+#+begin_src elisp
+
+;; Display an overlay of the currently selected history item in buffer
+(setq cider-repl-history-show-preview t)
+;; Syntax highlight overlays in cider buffers
+(setq cider-overlays-use-font-lock t)
+;; Set the default cljs repl type
+(setq cider-default-cljs-repl 'shadow)
+
+#+end_src
+
+* Custom Keybindings
+
+General Information on customizing key bindings:
+https://github.com/hlissner/doom-emacs/blob/develop/docs/faq.org#how-do-i-bind-my-own-keys-or-change-existing-ones
+
+https://github.com/hlissner/doom-emacs/blob/develop/modules/config/default/+evil-bindings.el
+
+** General Movement Keybindings
+
+#+begin_src elisp
+
+;; Reference https://github.com/hlissner/doom-emacs/issues/2403
+(map! :map general-override-mode-map
+      :i "C-j" #'evil-next-line         ;; replaces +default/newline
+      :i "C-k" #'evil-previous-line     ;; replaces n: C-k kill-line i: C-k evil-insert-digraph
+      :i "C-h" #'evil-backward-char     ;; replaces C-h for help which is also bound to F1
+      :i "C-l" #'evil-forward-char      ;; replaces i: recenter-top-bottom n: recenter-top-bottom
+      :i "C-M-h" #'evil-backward-word-begin ;; replaces mark-defun consider using expand-region instead?
+      :in "C-;" #'doom/forward-to-last-non-comment-or-eol ;; i: C-; nil by default
+      :in "C-'" #'doom/forward-to-last-non-comment-or-eol ;; n: C-' nil by default
+      )
+
+#+end_src
+
+#+begin_src elisp
+
+;; Unbind text-scale-decrease because I hit it by accident
+(map! :n "C--" nil)
+
+#+end_src
+
+** Expand Region Keybindings
+
+#+begin_src elisp
+
+(map!
+ :nv "C-+" #'er/contract-region
+ :nv "C-=" #'er/expand-region
+ :nv "C-z" #'evil-undo)
+
+;; Map C-- to expand region because I always miss it.
+(map! :nv "C--" #'er/expand-region)
+
+;; Add another way to get to hippie-expand or dabbrev-expand because it's so useful
+(map! :map general-override-mode-map
+      :i "C-\\" #'dabbrev-expand) ;; replaces toggle-input-method
+
+#+end_src
+
+* Custom Functions
+
+#+begin_src elisp
+;; Adapted from https://github.com/abo-abo/avy/issues/89
+
+(defun ae/avy-goto-char-in-defun (char)
+  "Jump to a character in the defun at point."
+  (interactive "cchar: ")
+  (let ((beg nil) (end nil))
+    (save-excursion
+      (beginning-of-defun)
+      (setq beg (point))
+      (end-of-defun)
+      (setq end (point)))
+    (avy--generic-jump (string char) nil beg end)))
+
+(defun ae/avy-goto-paren-in-defun ()
+  "jump to an open paren in the defun at point."
+  (interactive)
+  (let ((beg nil) (end nil))
+    (save-excursion
+      (beginning-of-defun)
+      (setq beg (point))
+      (end-of-defun)
+      (setq end (point)))
+    (avy--generic-jump (regexp-quote "(" ) nil beg end)))
+
+#+end_src
+
+#+begin_src elisp
+
+(defun xah-unfill-paragraph ()
+  "Replace newline chars in current paragraph by single spaces.
+This command does the inverse of `fill-paragraph'.
+
+URL `http://ergoemacs.org/emacs/emacs_unfill-paragraph.html'
+Version 2016-07-13"
+  (interactive)
+  (let ((fill-column most-positive-fixnum))
+    (fill-paragraph)))
+
+(defun xah-unfill-region (start end)
+  "Replace newline chars in region by single spaces.
+This command does the inverse of `fill-region'.
+
+URL `http://ergoemacs.org/emacs/emacs_unfill-paragraph.html'
+Version 2016-07-13"
+  (interactive "r")
+  (let ((fill-column most-positive-fixnum))
+    (fill-region start end)))
+#+end_src
+
+#+begin_src elisp
+;; From https://stackoverflow.com/questions/2926088/how-to-indent-a-buffer-in-ess
+;; Re-indent whole buffer
+(defun z-indent-buffer()
+  (interactive)
+  (save-excursion
+    (indent-region (point-min) (point-max))))
+#+end_src
+
+#+begin_src elisp
+(defun flush-blank-lines (start end)
+  "This will flush blank lines and works with a region.
+URL `https://masteringemacs.com/article/removing-blank-lines-buffer'
+"
+  (interactive "r")
+  (flush-lines "^\\s-*$" start end nil))
+#+end_src
