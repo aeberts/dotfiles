@@ -245,7 +245,11 @@ Default Doom Emacs config:
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org/")
-(setq org-startup-folded 1)
+
+(after! 'org
+  (setq org-startup-folded t))
+
+;; Use fancy eliipses - diabled because it can crash org-mode
 ;; (setq org-ellipsis " ▼ ")
 
 ;; org-tempo allows us to type <s TAB and complete org-mode templates.

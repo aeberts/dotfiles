@@ -1,0 +1,209 @@
+;; goku will read config file and update `Default` profile in karabiner.json
+;; goku will leave other profiles alone
+;; - goku config file location: /Users/zand/.config/karabiner.edn
+;; - karabiner config file location:  /Users/zand/.config/karabiner/karabiner.json
+;;
+;; Cheatsheet:
+;; the rule [:!Ca :!T1]
+;; means from command a to control 1
+;; :!Ca is keycode :a and prefix a with !C
+
+;; !  | mandatory
+;; #  | optional
+;; C  | left_command
+;; T  | left_control
+;; O  | left_option
+;; S  | left_shift
+;; F  | fn
+;; Q  | right_command
+;; W  | right_control
+;; E  | right_option
+;; R  | right_shift
+;; P  | caps_lock
+;; !! | mandatory command + control + optional + shift (hyper)
+;; ## | optional any
+;; C T O S for left command control optional shift
+;; Q W E R for right command control optional shift
+
+;; Notes:
+;; specific rule should come first
+;; generic rules should come after
+;;
+;; !  | mandatory
+;;                  modifier *has* to be present for event to occur
+;;                  modifier is removed in output (to event)
+;; #  | optional (single)
+;;                  one of the optional modifiers has to exist but not all
+;;                  only this modifier has to exist, combining with another won't work
+;;                  modifier is kept in output (to event)
+;; ## | optional any
+;;                  what you would expect, everything is tacked on
+
+;; need to prefix C T O S F with ! or #
+
+{
+ :profiles {
+           :Default {
+                     :default true
+                     :sim     100    ;; simultaneous_threshold_milliseconds (def: 50)
+                     ;; if keydown event for two different keys are pressed within :sim ms, the keypresses are considered simultaneous
+                     :delay   500    ;; to_delayed_action_delay_milliseconds (def: 500)
+                     ;; after :delay ms, the key press is considered to be delayed (TODO WHAT IS THIS??)
+                     :alone   1000   ;; to_if_alone_timeout_milliseconds (def: 1000)
+                     ;; if keyup event comes within :alone ms from keydown, the key is not just pressed but held
+                     :held    500   ;; to_if_held_down_threshold_milliseconds (def: 500)
+                     ;; key is fired twice when :held ms is elapsed (otherwise seen as a hold command) (TODO WHAT IS THIS??)
+                     }
+           }
+
+:layers {
+         :caps-mode {:key :caps_lock :alone {:key :escape}}
+         }
+
+;; Set Control Option 1 to Command Option 1 only in Terminal, Emacs, MacVim
+:applications {
+                :mac-terminal ["^com\\.apple\\.Terminal$"]
+                :iterm2 ["^com\\.googlecode\\.iterm2$"]
+                :chrome ["^com\\.google\\.Chrome$"]
+                :brave ["^com\\.brave\\.Browser$"]
+                :browsers ["^com\\.google\\.Chrome$" "^com\\.brave\\.Browser$"]
+                :emacs ["^org\\.gnu\\.Emacs$"]
+                :mvim ["^org\\.vim\\.MacVim$"]
+                :intellij ["^com\\.jetbrains\\.intellij$"]
+                :finder ["^com\\.apple\\.finder$"]
+                :notes ["^com\\.apple\\.Notes$"]
+                :unix-like ["^com\\.apple\\.Terminal$" "^com\\.googlecode\\.iterm2$" "^org\\.gnu\\.Emacs$" "^org\\.vim\\.MacVim$"]
+                :all-terminals ["^com\\.apple\\.Terminal$" "^com\\.googlecode\\.iterm2$"]
+                }
+
+ :main [
+
+        {:des   "CAPS_LOCK to ESC when pressed alone, to CONTROL as modifier in UNIX-like apps"
+         :rules [
+                 [:##caps_lock :##left_control  [:unix-like] {:alone :escape}]
+                 ;; Make the cursor movement keys in terminal more Mac-like
+                 ;; Note: this requires setting "Use option as Meta" under keyboard settings in Terminal
+                 [:!Tj :left_arrow                      [:all-terminals]] ;; move cursor left
+                 [:!Tk :down_arrow                      [:all-terminals]] ;; history next
+                 [:!Tl :up_arrow                        [:all-terminals]] ;; history prev
+                 [:!Tsemicolon :right_arrow             [:all-terminals]] ;; move right
+                 [:!Th :!Ta                             [:all-terminals]] ;; beginning of line
+                 [:!Tquote :!Te                         [:all-terminals]] ;; end of line
+                 [:!Tu :!Tk                             [:all-terminals]] ;; kill to EOL
+                 [:!TOj :!Oleft_arrow                   [:mac-terminal]] ;; move back word
+                 [:!TOsemicolon :!Oright_arrow          [:mac-terminal]] ;; move forward word
+                 [:!TSclose_bracket :!Ttab              [:mac-terminal]] ;; Next tab
+                 [:!TSopen_bracket :!TStab              [:mac-terminal]] ;; Prev tab
+                 [:!TOj         [:escape :b]            [:iterm2]] ;; move back word
+                 [:!TOsemicolon [:escape :f]            [:iterm2]] ;; move forward word
+                 [:!TSclose_bracket :!CSclose_bracket   [:iterm2]] ;; Next tab
+                 [:!TSopen_bracket :!CSopen_bracket     [:iterm2]] ;; Prev tab
+                 ]
+         }
+
+        {:des   "CAPS_LOCK to ESC when pressed alone, to COMMAND as modifier in Mac apps"
+         :rules [
+                 ;; Remap CAPS_LOCK to Command in Unix-like apps
+                 [:##caps_lock :##left_command  [:!unix-like]]
+                 [:!C##j :##left_arrow          [:!unix-like]]
+                 [:!C##k :##down_arrow          [:!unix-like]]
+                 [:!C##l :##up_arrow            [:!unix-like]]
+                 [:!C##semicolon :##right_arrow [:!unix-like]]
+                 [:!C##h :!Cleft_arrow          [:!unix-like]]
+                 [:!C##quote :!Cright_arrow     [:!unix-like]]
+                 ;; Application Specific shortcuts
+                 ;; Browsers
+                 [:!Co :!Cl                     [:browsers]]
+                 [:!Ccomma :!Cleft_arrow        [:browsers]]
+                 [:!Cperiod :!Cright_arrow      [:browsers]]
+                 ;; NB: Next tab and previous tab will appear to jump around
+                 ;; if `Cycle through the most recently used tabs with Ctrl-Tab`
+                 ;; is selected in Brave preferences
+                 [:!CSopen_bracket :!TStab      [:brave]]
+                 [:!CSclose_bracket :!Ttab      [:brave]]
+                 [:!Cbackslash :!CSx            [:brave]] ;; Trigger 1password in brave
+                 ;; Intellij
+                 [:!Cquote :end                 [:intellij]]
+                 ]
+         }
+
+        ;; {:des "Sizeup: Translate Ctrl to Cmd in unix-like apps"
+        ;;  :rules [
+        ;;          [:!TO1 :!CO1 [:unix-like]]
+        ;;          [:!TO2 :!CO2 [:unix-like]]
+        ;;          [:!TO3 :!CO3 [:unix-like]]
+        ;;          ]
+        ;;  }
+        ]
+
+ }
+
+;; Cheatsheet
+;; the rule [:!Ca :!T1]
+;; means from command a to control 1
+;; :!Ca is keycode :a and prefix a with !C
+
+;; !  | mandatory
+;; #  | optional
+;; C  | left_command
+;; T  | left_control
+;; O  | left_option
+;; S  | left_shift
+;; F  | fn
+;; Q  | right_command
+;; W  | right_control
+;; E  | right_option
+;; R  | right_shift
+;; P  | caps_lock
+;; !! | mandatory command + control + optional + shift (hyper)
+;; ## | optional any
+;; C T O S for left command control optional shift
+;; Q W E R for right command control optional shift
+;;
+;; examples:
+;; !CTSequal_sign  | mandatory command control shift =
+;;                 | which is command control +
+;; !O#Sright_arrow | mandatory option optional any right_arrow
+
+;; rule [<from> <to>]
+;; if simplified modifier is used in <to>, optional(#) definition will be ignored.
+
+;; Reference:
+;;
+;;{:des "..."                               ;; -> description
+;; :rules[
+;;          [<from>  <to>  <conditions>]    ;; -> rule 1
+;;          [<from>  <to>  <conditions>]    ;; -> rule 2
+;; ]}
+
+;; rule [:period ["period-mode" 1] nil {:afterup ["period-mode" 0] :alone :period}]
+;;       |_____| |_______________| |_| |_________________________________________|
+;;        <from>    <to>      <conditions>         <other options>
+;;
+;; karabiner docs: ;; https://pqrs.org/osx/karabiner/json.html#complex_modifications-manipulator-definition
+;; <other options> includs ~to_if_alone~, ~to_if_held_down~,~to_after_key_up~, ~to_delayed_action~ and ~parameters~.
+
+;; (custom variables) & modifiers -> Advanced
+;; https://github.com/yqrashawn/GokuRakuJoudo/blob/master/examples.org#custom-variable
+;;
+;; All keycode definitions:
+;; https://github.com/yqrashawn/GokuRakuJoudo/blob/master/src/karabiner_configurator/keys_info.clj
+;; See also the Karabiner-EventViewer.app
+
+;; Karabiner definition of `mandatory` and `optional`
+;; https://karabiner-elements.pqrs.org/docs/json/complex-modifications-manipulator-definition/from/modifiers/
+;;
+;; Other references:
+;; - example: https://github.com/yqrashawn/GokuRakuJoudo/blob/master/examples.org
+;; - example configuration: https://github.com/yqrashawn/GokuRakuJoudo/blob/master/resources/configurations/edn/example.edn
+;; - tutorial: https://github.com/yqrashawn/GokuRakuJoudo/blob/master/tutorial.md
+;; - keycodes: https://github.com/yqrashawn/GokuRakuJoudo/blob/master/src/karabiner_configurator/keys_info.clj
+;;
+;; karabiner:
+;;   - keycodes: https://github.com/pqrs-org/Karabiner-Elements/blob/master/src/apps/PreferencesWindow/Resources/simple_modifications.json
+;;   - modifiers keys: https://karabiner-elements.pqrs.org/docs/json/complex-modifications-manipulator-definition/from/modifiers/#frommodifiersmandatory
+;;   - complex_modifications manipulator definition: https://karabiner-elements.pqrs.org/docs/json/complex-modifications-manipulator-definition/
+;;
+;; - helpful user configuration examples
+;;   - https://github.com/nikitavoloboev/dotfiles/blob/master/karabiner/karabiner.edn
+;; https://raw.githubusercontent.com/fjchen7/dotfiles/6edbb0d6bd2da06ba0b15b0ea26b6f3d85cec3f8/karabiner/karabiner.edn
