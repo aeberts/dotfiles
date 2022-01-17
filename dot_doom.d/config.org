@@ -1,3 +1,5 @@
+#+STARTUP: overview
+
 * Instructions
 
 The source blocks in this file are automatically converted to a config.el file after running ~/.doom-emacs/bin/doom sync
@@ -131,7 +133,7 @@ they are implemented.
 (defun bb/evil-delete (orig-fn beg end &optional type _ &rest args)
   (apply orig-fn beg end type ?_ args))
 
-(advice-add 'evil-delete :around 'bb/evil-delete)
+;;(advice-add 'evil-delete :around 'bb/evil-delete)
 
 ;; Allow pasting the current word with most recently copied text in normal mode
 ;; Should be bound to a keybinding at some point
@@ -154,6 +156,32 @@ they are implemented.
       :desc "Emulate `copy replaces selection` in visual mode"
       :v
       "p" #'delete-selection-and-paste)
+#+end_src
+
+* Evil Owl
+
+Evil owl is the emacs equilalent of vim-peekaboo.
+It shows you the contents of registers so you don't have to remember where you put stuff.
+
+Press q, @, ​"​, C-r, m, ​'​, or ` to view the popup,
+Press C-f or C-b to scroll it,
+input a register or mark to make the popup disappear.
+
+Reference:
+https://github.com/mamapanda/evil-owl
+
+#+begin_src elisp
+
+(use-package evil-owl
+  :after evil
+  :config
+  (setq evil-owl-register-char-limit 100
+        evil-owl-display-method 'posframe
+        evil-owl-extra-posframe-args '(:internal-border-color "gray50"
+                                       :internal-border-width 2
+                                       :width 80))
+  (evil-owl-mode))
+
 #+end_src
 
 * Helm Config
@@ -246,16 +274,29 @@ Default Doom Emacs config:
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org/")
 
+#+end_src
+
+ #+begin_src elisp
+;; Fold all sections when an org file is loaded
+;; https://github.com/hlissner/doom-emacs/issues/4318
+;; Doesn't appear to work
 (after! 'org
   (setq org-startup-folded t))
+#+end_src
 
+#+begin_src elisp
 ;; Use fancy eliipses - diabled because it can crash org-mode
 ;; (setq org-ellipsis " ▼ ")
+#+end_src
 
+#+begin_src elisp
 ;; org-tempo allows us to type <s TAB and complete org-mode templates.
 ;; https://emacs.stackexchange.com/questions/46795/is-it-possible-to-add-templates-other-than-begin-end-to-org-structure-temp
-(require 'org-tempo)
+(after! 'org
+  (require 'org-tempo))
+#+end_src
 
+#+begin_src elisp
 ;; Customize org-mode structure templates
 ;; https://orgmode.org/manual/Structure-Templates.html#Structure-Templates
 ;; https://emacs.stackexchange.com/questions/63875/emacs-org-mode-shortcut-to-create-code-block
@@ -264,7 +305,9 @@ Default Doom Emacs config:
                '("z" . "src clojure"))
   (add-to-list 'org-structure-template-alist
                '("u" . "src elisp")))
+#+end_src
 
+#+begin_src elisp
 ;; reset the org-structure-template-alist in case of errors
 ;; (custom-reevaluate-setting 'org-structure-template-alist)
 #+end_src
@@ -408,7 +451,6 @@ https://github.com/hlissner/doom-emacs/blob/develop/modules/config/default/+evil
 
 #+begin_src elisp
 ;; Adapted from https://github.com/abo-abo/avy/issues/89
-
 (defun ae/avy-goto-char-in-defun (char)
   "Jump to a character in the defun at point."
   (interactive "cchar: ")
@@ -419,7 +461,10 @@ https://github.com/hlissner/doom-emacs/blob/develop/modules/config/default/+evil
       (end-of-defun)
       (setq end (point)))
     (avy--generic-jump (string char) nil beg end)))
+#+end_src
 
+#+begin_src elisp
+;; Adapted from https://github.com/abo-abo/avy/issues/89
 (defun ae/avy-goto-paren-in-defun ()
   "jump to an open paren in the defun at point."
   (interactive)
@@ -430,11 +475,9 @@ https://github.com/hlissner/doom-emacs/blob/develop/modules/config/default/+evil
       (end-of-defun)
       (setq end (point)))
     (avy--generic-jump (regexp-quote "(" ) nil beg end)))
-
 #+end_src
 
 #+begin_src elisp
-
 (defun xah-unfill-paragraph ()
   "Replace newline chars in current paragraph by single spaces.
 This command does the inverse of `fill-paragraph'.
@@ -444,7 +487,9 @@ Version 2016-07-13"
   (interactive)
   (let ((fill-column most-positive-fixnum))
     (fill-paragraph)))
+#+end_src
 
+#+begin_src elisp
 (defun xah-unfill-region (start end)
   "Replace newline chars in region by single spaces.
 This command does the inverse of `fill-region'.
@@ -458,8 +503,8 @@ Version 2016-07-13"
 
 #+begin_src elisp
 ;; From https://stackoverflow.com/questions/2926088/how-to-indent-a-buffer-in-ess
-;; Re-indent whole buffer
-(defun z-indent-buffer()
+(defun z-indent-buffer ()
+  "Re-indents the whole buffer"
   (interactive)
   (save-excursion
     (indent-region (point-min) (point-max))))
