@@ -89,7 +89,6 @@ plugins=(
          themes
          vscode
          zsh-syntax-highlighting
-         zsh-vi-mode
         )
 
 source $ZSH/oh-my-zsh.sh
@@ -178,7 +177,7 @@ LS_COLORS='rs=0:di=01;36:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:c
 export LS_COLORS
 
 # Homebrew Config
-export HOMEBREW_NO_CLEANUP_FORMULAE=temurin11,emacs-mac
+export HOMEBREW_NO_CLEANUP_FORMULAE=temurin,temurin11,temurin17,emacs-mac
 
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
@@ -200,11 +199,14 @@ alias vim='/usr/local/bin/vim'
 alias cm='chezmoi'
 alias opsi='eval $(op signin my)'
 
-# Jenv Configuration
-if type -p jenv &> /dev/null; then
-	export PATH="$HOME/.jenv/bin:$HOME/bin:$PATH"
-	eval "$(jenv init -)"
-fi
+# Java switcher
+# From: https://gist.github.com/tinkerware/8d92524d78f958f3d821b127393a96a1
+# alias j8="export JAVA_HOME=`/usr/libexec/java_home -v 1.8`; java -version"
+alias j11="export JAVA_HOME=`/usr/libexec/java_home -v 11`; java -version"
+alias j17="export JAVA_HOME=`/usr/libexec/java_home -v 17`; java -version"
+
+# Set java 17 as default
+export JAVA_HOME=`/usr/libexec/java_home -v 17`
 
 # Homebrew personal access token:
 export HOMEBREW_GITHUB_API_TOKEN={{ (onepasswordDetailsFields "Homebrew Github API Token").password.value }}

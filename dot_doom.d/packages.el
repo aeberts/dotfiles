@@ -55,4 +55,10 @@
 (package! company-org-roam
   :recipe (:host github :repo "org-roam/company-org-roam"))
 
+;; Scriptwriting package
+;; https://github.com/rnkn/fountain-mode
 (package! fountain-mode)
+
+;; https://github.com/mamapanda/evil-owl
+(package! evil-owl
+  :recipe (:host github :repo "mamapanda/evil-owl" ))

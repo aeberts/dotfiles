@@ -16,5 +16,7 @@
 ("spacemacs" . ((user-emacs-directory . "~/.spacemacs-emacs")
 	      (env . (("SPACEMACSDIR" . "~/.spacemacs.d")))))
 
-("vanilla" . ((user-emacs-directory . "~/.emacs.default")))
-)
+ ("corgi" . ((user-emacs-directory . "~/.corgi-emacs")))
+
+ ("vanilla" . ((user-emacs-directory . "~/.emacs.default")))
+ )

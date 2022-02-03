@@ -54,6 +54,12 @@ they are implemented.
 (setq initial-frame-alist '((top . 1) (left . 1) (width . 157) (height . 81)))
 #+end_src
 
+#+begin_src elisp
+;; Fully re-draw the display before procesessing queued input events
+;; May provide a smoother typing experience
+(setq redisplay-dont-pause t)
+#+end_src
+
 * Fonts
 
 #+begin_src elisp
@@ -87,6 +93,8 @@ they are implemented.
   (load-theme 'leuven t) ; my main light theme
   ;; (load-theme 'leuven-dark t) ; dark version of leuven (not my favourite)
   ;; (setq doom-theme 'doom-one) ; my main dark theme
+  ;; (setq doom-theme 'doom-vibrant) ;
+  ;; (setq doom-theme 'doom-nova) ;
   ;; (setq doom-theme 'doom-spacegrey)
   ;; (setq doom-theme 'doom-wilmersdorf)
   ;; (setq doom-theme 'doom-palenight)
@@ -370,6 +378,8 @@ Default Doom Emacs config:
 
 * Lispy Config
 
+I have not enabled lispy in a while but here's a config anyway.
+
 #+begin_src elisp
 
 (setq lispyville-key-theme
@@ -389,10 +399,16 @@ Default Doom Emacs config:
 
 #+begin_src elisp
 
+;; Enable rainbow-delimiters-mode in clojure mode
+;; Doesn't seem to do anything
+(add-hook 'clojure-mode-hook #'rainbow-delimiters-mode)
+
 ;; Display an overlay of the currently selected history item in buffer
 (setq cider-repl-history-show-preview t)
+
 ;; Syntax highlight overlays in cider buffers
 (setq cider-overlays-use-font-lock t)
+
 ;; Set the default cljs repl type
 (setq cider-default-cljs-repl 'shadow)
 
