@@ -72,6 +72,7 @@
                 :intellij ["^com\\.jetbrains\\.intellij$"]
                 :finder ["^com\\.apple\\.finder$"]
                 :notes ["^com\\.apple\\.Notes$"]
+                :vscode ["^com\\.microsoft\\.VSCode$"]
                 :unix-like ["^com\\.apple\\.Terminal$" "^com\\.googlecode\\.iterm2$" "^org\\.gnu\\.Emacs$" "^org\\.vim\\.MacVim$"]
                 :all-terminals ["^com\\.apple\\.Terminal$" "^com\\.googlecode\\.iterm2$"]
                 }
@@ -103,7 +104,7 @@
 
         {:des   "CAPS_LOCK to ESC when pressed alone, to COMMAND as modifier in Mac apps"
          :rules [
-                 ;; Remap CAPS_LOCK to Command in Unix-like apps
+                 ;; Remap CAPS_LOCK to Command in standard Mac apps
                  [:##caps_lock :##left_command  [:!unix-like]]
                  [:!C##j :##left_arrow          [:!unix-like]]
                  [:!C##k :##down_arrow          [:!unix-like]]
