@@ -208,6 +208,9 @@ alias j17="export JAVA_HOME=`/usr/libexec/java_home -v 17`; java -version"
 # Set java 17 as default
 export JAVA_HOME=`/usr/libexec/java_home -v 17`
 
+# This is needed to support XTDB on Java 17 x86
+export XTDB_ENABLE_BYTEUTILS_SHA1=true
+
 # Homebrew personal access token:
 export HOMEBREW_GITHUB_API_TOKEN={{ (onepasswordDetailsFields "Homebrew Github API Token").password.value }}
 

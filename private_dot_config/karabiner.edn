@@ -106,13 +106,8 @@
          :rules [
                  ;; Remap CAPS_LOCK to Command in standard Mac apps
                  [:##caps_lock :##left_command  [:!unix-like]]
-                 [:!C##j :##left_arrow          [:!unix-like]]
-                 [:!C##k :##down_arrow          [:!unix-like]]
-                 [:!C##l :##up_arrow            [:!unix-like]]
-                 [:!C##semicolon :##right_arrow [:!unix-like]]
-                 [:!C##h :!Cleft_arrow          [:!unix-like]]
-                 [:!C##quote :!Cright_arrow     [:!unix-like]]
-                 ;; Application Specific shortcuts
+                 ;; Specific shortcuts should come before more general shortcuts
+                 ;;
                  ;; Browsers
                  [:!Co :!Cl                     [:browsers]]
                  [:!Ccomma :!Cleft_arrow        [:browsers]]
@@ -124,7 +119,19 @@
                  [:!CSclose_bracket :!Ttab      [:brave]]
                  [:!Cbackslash :!CSx            [:brave]] ;; Trigger 1password in brave
                  ;; Intellij
-                 [:!Cquote :end                 [:intellij]]
+                 [:!C##quote :##end                 [:intellij]]
+                 [:!C##h :##home                 [:intellij]]
+                 ;; VS Code
+                 [:!C##quote :##end               [:vscode]]
+                 [:!C##h :##home               [:vscode]]
+
+                 ;; General Keyboard Shortcuts
+                 [:!C##j :##left_arrow          [:!unix-like]]
+                 [:!C##k :##down_arrow          [:!unix-like]]
+                 [:!C##l :##up_arrow            [:!unix-like]]
+                 [:!C##semicolon :##right_arrow [:!unix-like]]
+                 [:!C##h :!C##left_arrow          [:!unix-like]]
+                 [:!C##quote :!C##right_arrow     [:!unix-like]]
                  ]
          }
 
