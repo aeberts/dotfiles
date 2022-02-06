@@ -55,6 +55,11 @@ they are implemented.
 #+end_src
 
 #+begin_src elisp
+;; Set the default frame size
+(setq default-frame-alist '((top . 1) (left . 1) (width . 157) (height . 81)))
+#+end_src
+
+#+begin_src elisp
 ;; Fully re-draw the display before procesessing queued input events
 ;; May provide a smoother typing experience
 (setq redisplay-dont-pause t)
@@ -465,6 +470,8 @@ https://github.com/hlissner/doom-emacs/blob/develop/modules/config/default/+evil
 
 * Custom Functions
 
+** Jump to Char or Paren in Defun:
+
 #+begin_src elisp
 ;; Adapted from https://github.com/abo-abo/avy/issues/89
 (defun ae/avy-goto-char-in-defun (char)
@@ -493,6 +500,8 @@ https://github.com/hlissner/doom-emacs/blob/develop/modules/config/default/+evil
     (avy--generic-jump (regexp-quote "(" ) nil beg end)))
 #+end_src
 
+** Un-Fill Paragraph or Region
+
 #+begin_src elisp
 (defun xah-unfill-paragraph ()
   "Replace newline chars in current paragraph by single spaces.
@@ -517,6 +526,8 @@ Version 2016-07-13"
     (fill-region start end)))
 #+end_src
 
+** Reformat Buffer (Indent Buffer)
+
 #+begin_src elisp
 ;; From https://stackoverflow.com/questions/2926088/how-to-indent-a-buffer-in-ess
 (defun z-indent-buffer ()
@@ -525,6 +536,8 @@ Version 2016-07-13"
   (save-excursion
     (indent-region (point-min) (point-max))))
 #+end_src
+
+** Flush Blank Regions
 
 #+begin_src elisp
 (defun flush-blank-lines (start end)
