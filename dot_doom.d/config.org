@@ -286,7 +286,6 @@ Default Doom Emacs config:
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Dropbox/org/")
-
 #+end_src
 
  #+begin_src elisp
@@ -318,11 +317,15 @@ Default Doom Emacs config:
                '("z" . "src clojure"))
   (add-to-list 'org-structure-template-alist
                '("u" . "src elisp")))
+
+;; reset the org-structure-template-alist in case of errors
+;; (custom-reevaluate-setting 'org-structure-template-alist)
 #+end_src
 
 #+begin_src elisp
-;; reset the org-structure-template-alist in case of errors
-;; (custom-reevaluate-setting 'org-structure-template-alist)
+;; change the directory where org caches it's files:
+;;(after! 'org
+;;  (setq org-persist-directory ~/.doom.d/org-persist/))
 #+end_src
 
 * Org-Roam Config:
@@ -346,6 +349,16 @@ Default Doom Emacs config:
         (default . lineage)))
 #+end_src
 
+#+begin_src elisp
+;; Toggle the org roam window when loading an org mode file.
+(defun toggle-org-roam-in-org-roam ()
+  "Toggle org-roam window when loading an org-roam file"
+  (when org-roam-mode (org-roam-buffer-toggle-display)))
+
+(add-hook 'org-roam-buffer-prepare-hook #'toggle-org-roam-in-org-roam)
+#+end_src
+
+** Org-mode Auto-Completion
 
 #+begin_src elisp
 ;; Autocompletion for org-roam
@@ -356,13 +369,6 @@ Default Doom Emacs config:
   :after org-roam
   :config
   (set-company-backend! 'org-mode '(company-org-roam company-yasnippet)))
-
-;; Toggle the org roam window when loading an org mode file.
-(defun toggle-org-roam-in-org-roam ()
-  "Toggle org-roam window when loading an org-roam file"
-  (when org-roam-mode (org-roam-buffer-toggle-display)))
-
-(add-hook 'org-roam-buffer-prepare-hook #'toggle-org-roam-in-org-roam)
 #+end_src
 
 * Treemacs Config
